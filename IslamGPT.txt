@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IslamGPT - رؤية جديدة متكاملة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --font-family: 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            
+            /* Modern Dusk Theme (Default) */
+            --bg-main: #161a1d;
+            --bg-surface: #1f2428;
+            --bg-surface-hover: #2c3136;
+            --bg-header: #1f2428;
+            
+            --text-primary: #e4e6eb;
+            --text-secondary: #b0b3b8;
+            --text-placeholder: #787a7e;
+
+            --accent-primary: #8a3ffc; /* Purple */
+            --accent-primary-hover: #7b2ae8;
+            --accent-secondary: #08BDBA; /* Teal */
+            --accent-secondary-hover: #07a2a0;
+
+            --user-message-bg: var(--accent-primary);
+            --user-message-text: #ffffff;
+            --bot-message-bg: var(--bg-surface-hover);
+            --bot-message-text: var(--text-primary);
+            
+            --border-color: #3a3f44;
+            --scrollbar-thumb: #4a4f54;
+            --scrollbar-track: var(--bg-surface);
+
+            --error-bg: #5c2323;
+            --error-text: #ffcccc;
+
+            --overlay-bg: rgba(0, 0, 0, 0.7); /* Darker overlay */
+            --shadow-color: rgba(0, 0, 0, 0.3);
+
+            --border-radius-sm: 6px;
+            --border-radius-md: 10px;
+            --border-radius-lg: 16px;
+
+            --transition-speed: 0.3s;
+            --message-font-base-size: 0.95rem; /* Default message font size */
+        }
+
+        /* Light Theme Variables */
+        :root.light-theme {
+            --bg-main: #f0f2f5;
+            --bg-surface: #ffffff;
+            --bg-surface-hover: #f8f9fa;
+            --bg-header: #ffffff;
+            
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --text-placeholder: #6c757d;
+
+            /* Re-evaluate accents for light mode if needed */
+            /* --accent-primary: #7b2ae8; */ /* Slightly darker purple on light if needed */
+            /* --accent-secondary: #07a2a0; */ /* Slightly darker teal on light if needed */
+
+            --user-message-bg: #007bff; 
+            --user-message-text: #ffffff;
+            --bot-message-bg: #e9ecef;
+            --bot-message-text: #212529;
+            
+            --border-color: #dee2e6;
+            --scrollbar-thumb: #adb5bd;
+            --scrollbar-track: #e9ecef;
+
+            --error-bg: #f8d7da;
+            --error-text: #721c24;
+            --overlay-bg: rgba(200, 200, 200, 0.6);
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
+
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { font-size: 16px; }
+        body {
+            font-family: var(--font-family); background-color: var(--bg-main);
+            color: var(--text-primary); display: flex; align-items: center;
+            justify-content: center; min-height: 100vh; overflow: hidden;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        .app-container {
+            display: flex; width: 100%; max-width: 1000px;
+            height: 100vh; max-height: 95vh; background: var(--bg-surface);
+            border-radius: var(--border-radius-lg);
+            box-shadow: 0 10px 40px var(--shadow-color);
+            overflow: hidden; position: relative;
+            transition: background-color var(--transition-speed);
+        }
+
+        /* Sidebar (Chat List) */
+        .sidebar {
+            width: 300px; background: var(--bg-main); color: var(--text-primary);
+            display: flex; flex-direction: column;
+            border-left: 1px solid var(--border-color); /* RTL */
+            flex-shrink: 0; transition: transform var(--transition-speed) ease-in-out, background-color var(--transition-speed), border-color var(--transition-speed);
+            z-index: 100;
+        }
+        .sidebar-header {
+            padding: 20px 15px; text-align: center;
+            border-bottom: 1px solid var(--border-color); flex-shrink: 0;
+            transition: border-color var(--transition-speed);
+        }
+        .sidebar-header h2 { font-size: 1.4em; margin-bottom: 8px; color: var(--accent-primary); }
+        .sidebar-header p { font-size: 0.85em; color: var(--text-secondary); }
+
+        .islamic-reminder {
+            font-size: 0.8em; color: var(--text-secondary); padding: 10px;
+            margin-top: 10px; border-top: 1px dashed var(--border-color);
+            border-bottom: 1px dashed var(--border-color); text-align: center;
+            min-height: 30px; transition: color var(--transition-speed), border-color var(--transition-speed);
+        }
+
+        #newChatBtn, .sidebar-footer-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: calc(100% - 30px); margin: 15px auto; padding: 12px 18px;
+            color: var(--user-message-text); border: none;
+            border-radius: var(--border-radius-md); cursor: pointer;
+            font-size: 1em; font-weight: 500;
+            transition: background-color var(--transition-speed) ease; flex-shrink: 0;
+        }
+        #newChatBtn { background: var(--accent-primary); }
+        #newChatBtn:hover { background: var(--accent-primary-hover); }
+        #newChatBtn i { margin-left: 10px; font-size: 1.1em; }
+
+        .sidebar-footer-btn {
+            margin-bottom: 20px; background: var(--bg-surface-hover);
+            color: var(--text-secondary); border: 1px solid var(--border-color); text-align: center;
+            font-size: 0.9em; transition: background-color var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
+        }
+        .sidebar-footer-btn:hover { background: var(--accent-secondary); color: white; }
+        .sidebar-footer-btn i { margin-left: 8px; }
+
+        .chat-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .chat-list::-webkit-scrollbar { width: 6px; }
+        .chat-list::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+        .chat-list::-webkit-scrollbar-track { background: transparent; }
+
+        .chat-list-item {
+            padding: 12px 15px; margin-bottom: 10px;
+            border-radius: var(--border-radius-md); cursor: pointer;
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease, border-color var(--transition-speed) ease;
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: var(--bg-surface); border: 1px solid transparent;
+        }
+        .chat-list-item:hover { background-color: var(--bg-surface-hover); }
+        .chat-list-item.active {
+            background-color: var(--accent-primary); color: var(--user-message-text);
+            font-weight: 600; border-color: var(--accent-primary-hover);
+        }
+        .chat-list-item.renaming { border-color: var(--accent-secondary); box-shadow: 0 0 5px var(--accent-secondary); }
+        .chat-list-item.active .delete-chat-btn { color: var(--user-message-text); opacity: 0.8; }
+        .chat-list-item.active .delete-chat-btn:hover { opacity: 1; }
+        .chat-list-item span {
+            flex-grow: 1; overflow: hidden; text-overflow: ellipsis;
+            white-space: nowrap; margin-left: 10px;
+        }
+        .delete-chat-btn {
+            background: none; border: none; color: var(--text-secondary);
+            cursor: pointer; font-size: 0.95em; padding: 5px;
+            opacity: 0.6; transition: opacity var(--transition-speed) ease, color var(--transition-speed) ease;
+            flex-shrink: 0;
+        }
+        .delete-chat-btn:hover { opacity: 1; color: var(--error-text); }
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1; display: flex; flex-direction: column;
+            background: var(--bg-surface); overflow: hidden;
+            transition: background-color var(--transition-speed);
+        }
+        .header {
+            background: var(--bg-header); color: var(--text-primary);
+            padding: 15px 20px; display: flex; align-items: center;
+            justify-content: space-between; position: relative;
+            border-bottom: 1px solid var(--border-color); flex-shrink: 0;
+            transition: background-color var(--transition-speed), border-color var(--transition-speed), color var(--transition-speed);
+        }
+        #menuToggleBtn {
+            background: none; border: none; color: var(--text-primary);
+            font-size: 1.5em; cursor: pointer; padding: 5px; display: none;
+        }
+        .header-content { text-align: center; flex-grow: 1; }
+        .header-content h1 { font-size: 1.3em; margin-bottom: 2px; display: flex; align-items: center; justify-content: center; }
+        .header-content h1 .fa-mosque { margin-left: 10px; color: var(--accent-secondary); }
+        .header-content p { font-size: 0.8em; color: var(--text-secondary); }
+        
+        .header-actions { display: flex; align-items: center; gap: 5px; }
+        .header-actions button {
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 1.2em; padding: 8px; cursor: pointer;
+            border-radius: 50%; transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+        .header-actions button:hover { background-color: var(--bg-surface-hover); color: var(--text-primary); }
+
+        .chat-options-dropdown { position: relative; }
+        .dropdown-content {
+            display: none; position: absolute; left: 0; /* RTL: right: 0; left: auto; */
+            top: 100%; background-color: var(--bg-main); min-width: 200px;
+            box-shadow: 0px 8px 16px 0px var(--shadow-color); z-index: 10;
+            border-radius: var(--border-radius-md); border: 1px solid var(--border-color);
+            padding: 5px 0;
+        }
+        .dropdown-content button {
+            color: var(--text-primary); padding: 10px 15px; text-decoration: none;
+            display: block; width: 100%; text-align: right; /* RTL */
+            font-size: 0.9em; border-radius: 0;
+        }
+        .dropdown-content button:hover { background-color: var(--bg-surface-hover); }
+        .chat-options-dropdown.open .dropdown-content { display: block; }
+
+        #botStatus {
+            font-size: 0.75em; color: var(--accent-secondary);
+            opacity: 0; transition: opacity var(--transition-speed) ease;
+            min-width: 80px; text-align: left; /* RTL: right */
+        }
+        #botStatus.visible { opacity: 1; }
+
+        .search-bar-container {
+            padding: 10px 15px; background-color: var(--bg-main);
+            border-bottom: 1px solid var(--border-color);
+            display: none; /* JS toggles to flex */
+            gap: 10px; align-items: center;
+            transition: background-color var(--transition-speed), border-color var(--transition-speed);
+        }
+        .search-bar-container.visible { display: flex; }
+        #chatSearchInput {
+            flex-grow: 1; padding: 8px 12px; background-color: var(--bg-surface);
+            color: var(--text-primary); border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md); font-size: 0.9em;
+            transition: background-color var(--transition-speed), border-color var(--transition-speed), color var(--transition-speed);
+        }
+        #clearSearchBtn {
+            background: none; border: none; color: var(--text-secondary);
+            font-size: 1.2em; cursor: pointer;
+        }
+
+        .messages {
+            flex: 1; padding: 20px; overflow-y: auto;
+            position: relative; scroll-behavior: smooth;
+        }
+        .messages::-webkit-scrollbar { width: 7px; }
+        .messages::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
+        .messages::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+
+        .message {
+            margin-bottom: 18px; padding: 12px 18px;
+            border-radius: var(--border-radius-lg);
+            max-width: 75%; word-wrap: break-word; line-height: 1.6;
+            position: relative; opacity: 0;
+            animation: fadeInMessage 0.5s forwards;
+            font-size: var(--message-font-base-size); /* Applied from JS */
+            transition: background-color var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
+        }
+        .message.animate-new { transform: translateY(20px); }
+        @keyframes fadeInMessage { to { opacity: 1; transform: translateY(0); } }
+
+        .message-content { margin-bottom: 6px; }
+        .message-timestamp { font-size: 0.75em; color: var(--text-secondary); text-align: inherit; }
+        
+        .message-actions { /* Container for copy and pin */
+            position: absolute; top: 8px;
+            display: flex; gap: 5px;
+            opacity: 0; transition: opacity var(--transition-speed);
+        }
+        .message:hover .message-actions { opacity: 1; }
+
+        .copy-message-btn, .pin-message-btn {
+            background: rgba(0,0,0,0.2); border:none;
+            border-radius: 50%; width: 28px; height: 28px;
+            font-size: 0.8em; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+            color: var(--text-secondary);
+        }
+        .copy-message-btn:hover, .pin-message-btn:hover { background: rgba(0,0,0,0.4); color: var(--text-primary); }
+        
+        .pin-message-btn.pinned { color: var(--accent-secondary); }
+
+        .user-message {
+            background: var(--user-message-bg); color: var(--user-message-text);
+            margin-left: auto; text-align: right;
+            border-bottom-right-radius: var(--border-radius-sm);
+        }
+        .user-message .message-timestamp { color: rgba(255,255,255,0.7); }
+        .user-message .message-actions { right: 8px; /* RTL: left */ }
+
+        .bot-message {
+            background: var(--bot-message-bg); color: var(--bot-message-text);
+            margin-right: auto; border-bottom-left-radius: var(--border-radius-sm);
+            border: 1px solid var(--border-color);
+        }
+        .bot-message .message-actions { left: 8px; /* RTL: right */ }
+
+        .input-area {
+            display: flex; padding: 15px; background: var(--bg-main);
+            border-top: 1px solid var(--border-color);
+            gap: 10px; align-items: flex-end; flex-shrink: 0;
+            transition: background-color var(--transition-speed), border-color var(--transition-speed);
+        }
+        #messageInput {
+            flex: 1; padding: 12px 18px; border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md); outline: none;
+            font-size: 1rem; resize: none; min-height: 48px; max-height: 120px;
+            font-family: inherit; line-height: 1.5;
+            background-color: var(--bg-surface); color: var(--text-primary);
+            transition: background-color var(--transition-speed), border-color var(--transition-speed), color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+        #messageInput::placeholder { color: var(--text-placeholder); }
+        #messageInput:focus { border-color: var(--accent-primary); box-shadow: 0 0 0 2px var(--accent-primary); }
+
+        #sendBtn {
+            background: var(--accent-secondary); color: #fff; border: none;
+            padding: 0 20px; height: 48px; border-radius: var(--border-radius-md);
+            cursor: pointer; font-size: 1rem; font-weight: 600;
+            display: flex; align-items: center; justify-content: center;
+            transition: background-color var(--transition-speed) ease, transform 0.1s ease;
+            flex-shrink: 0;
+        }
+        #sendBtn:hover { background: var(--accent-secondary-hover); }
+        #sendBtn:active:not(:disabled) { transform: scale(0.95); }
+        #sendBtn:disabled { background: #50555a; color: #8e9092; cursor: not-allowed; }
+        #sendBtn i { margin-left: 8px; font-size: 1em; }
+
+        .loading, .info-message {
+            color: var(--text-secondary); font-style: italic;
+            text-align: center; padding: 20px; font-size: 0.9rem;
+        }
+        .loading i { margin-right: 8px; }
+
+        .welcome-area, .no-chat-selected {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; height: 100%; text-align: center;
+            color: var(--text-secondary); padding: 20px;
+            opacity: 0; animation: fadeInWelcome 0.6s 0.2s forwards;
+        }
+        @keyframes fadeInWelcome { to { opacity: 1; } }
+        .welcome-area i, .no-chat-selected i {
+            font-size: 3.5em; margin-bottom: 20px; color: var(--accent-primary);
+        }
+        .welcome-area h3, .no-chat-selected h3 {
+            color: var(--text-primary); margin-bottom: 12px; font-size: 1.5em;
+        }
+        .welcome-area p, .no-chat-selected p { font-size: 0.95em; line-height: 1.6; }
+
+        .quick-prompts-container {
+            padding: 15px; text-align: center;
+        }
+        .quick-prompts-container h4 {
+            font-size: 0.9em; color: var(--text-secondary); margin-bottom: 10px;
+        }
+        .quick-prompt-btn {
+            background-color: var(--bg-surface-hover); color: var(--text-primary);
+            border: 1px solid var(--border-color); padding: 8px 12px;
+            margin: 5px; border-radius: var(--border-radius-md); cursor: pointer;
+            font-size: 0.85em; transition: background-color var(--transition-speed), color var(--transition-speed), border-color var(--transition-speed);
+        }
+        .quick-prompt-btn:hover { background-color: var(--accent-secondary); color: white; }
+        
+        mark { /* For search highlighting */
+            background-color: var(--accent-secondary); color: white;
+            padding: 0.1em 0.2em; border-radius: var(--border-radius-sm);
+        }
+
+        .error {
+            background: var(--error-bg) !important; color: var(--error-text) !important;
+            border: 1px solid var(--error-text) !important;
+        }
+        .error .message-timestamp { color: var(--error-text) !important; opacity: 0.7; }
+
+        .mobile-overlay {
+            display: none; position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%; background: var(--overlay-bg);
+            z-index: 50; opacity: 0;
+            transition: opacity var(--transition-speed) ease-in-out;
+        }
+        .mobile-overlay.active { display: block; opacity: 1; }
+
+        #scrollToBottomBtn {
+            position: absolute; bottom: 20px; right: 20px;
+            background-color: var(--accent-secondary); color: white; border: none;
+            border-radius: 50%; width: 45px; height: 45px; font-size: 1.2em;
+            cursor: pointer; display: none; align-items: center; justify-content: center;
+            box-shadow: 0 2px 10px var(--shadow-color); z-index: 10;
+            opacity: 0; transition: opacity var(--transition-speed) ease, transform var(--transition-speed) ease;
+        }
+        #scrollToBottomBtn.visible { display: flex; opacity: 1; transform: translateY(0); }
+        #scrollToBottomBtn:hover { background-color: var(--accent-secondary-hover); }
+
+        /* Settings Modal */
+        .modal-container {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--overlay-bg); justify-content: center; align-items: center;
+            z-index: 200; opacity: 0; transition: opacity var(--transition-speed);
+        }
+        .modal-container.visible { display: flex; opacity: 1; }
+        .modal-content {
+            background-color: var(--bg-surface); padding: 25px 30px;
+            border-radius: var(--border-radius-lg); box-shadow: 0 5px 20px var(--shadow-color);
+            width: 90%; max-width: 450px; position: relative; color: var(--text-primary);
+            transform: scale(0.95); transition: transform var(--transition-speed);
+        }
+        .modal-container.visible .modal-content { transform: scale(1); }
+        .modal-content h2 { text-align: center; margin-bottom: 20px; color: var(--accent-primary); font-size: 1.5em; }
+        .modal-content h2 i { margin-left: 10px; }
+        .modal-close-btn {
+            position: absolute; top: 10px; right: 15px; /* RTL: left */
+            background: none; border: none; font-size: 1.8em;
+            color: var(--text-secondary); cursor: pointer;
+        }
+        .setting-item {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 15px; padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color); font-size: 1em;
+        }
+        .setting-item:last-child { border-bottom: none; margin-bottom: 0; }
+        .setting-item label { margin-left: 10px; }
+        .setting-item > div { display: flex; align-items: center; }
+        .setting-item button {
+            background: var(--bg-surface-hover); color: var(--text-primary);
+            border: 1px solid var(--border-color); border-radius: var(--border-radius-sm);
+            padding: 5px 10px; cursor: pointer; transition: background-color var(--transition-speed);
+        }
+        .setting-item button:hover { background: var(--accent-primary); color: var(--user-message-text); }
+        #currentFontSizePreview { margin: 0 5px; min-width: 40px; text-align: center; color: var(--text-secondary); }
+        #requestNotificationPermissionBtn { width: 100%; margin-top: 10px; background-color: var(--accent-secondary); color: white; }
+        #requestNotificationPermissionBtn:hover { background-color: var(--accent-secondary-hover); }
+
+
+        /* Visually Hidden for ARIA */
+        .visually-hidden {
+            position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+        }
+
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            body { padding: 0; }
+            .app-container { max-height: 100vh; border-radius: 0; box-shadow: none; }
+            #menuToggleBtn { display: block; }
+            .sidebar {
+                position: absolute; top: 0; right: -300px; /* RTL */
+                height: 100%; width: 300px; border-left: none;
+                box-shadow: -5px 0 15px var(--shadow-color);
+            }
+            .sidebar.open { transform: translateX(-300px); /* RTL */ }
+            .header { padding: 12px 15px; justify-content: space-between;}
+            .header #botStatus { display: none; }
+            .header-content h1 { font-size: 1.2em; }
+            .header-content p { font-size: 0.75em; }
+            .messages { padding: 15px 10px; }
+            /* :root { --message-font-base-size: 0.9rem; } Already handled by JS font size logic */
+            .input-area { padding: 10px; }
+            #messageInput { padding: 10px 15px; min-height: 44px; font-size: 1rem; }
+            #sendBtn { height: 44px; padding: 0 15px; font-size: 0.95rem; }
+            .welcome-area i, .no-chat-selected i { font-size: 2.5em; }
+            .welcome-area h3, .no-chat-selected h3 { font-size: 1.3em; }
+            #scrollToBottomBtn { bottom: 15px; right: 15px; width: 40px; height: 40px; font-size: 1.1em;}
+            .modal-content { width: 95%; padding: 20px; }
+        }
+        @media (max-width: 480px) {
+            html { font-size: 15px; }
+            .sidebar { width: 260px; right: -260px; } /* RTL */
+            .sidebar.open { transform: translateX(-260px); /* RTL */ }
+            .header-content h1 { font-size: 1.1em; }
+            /* :root { --message-font-base-size: 0.85rem; } Already handled by JS font size logic */
+            .message-timestamp { font-size: 0.7em; }
+            .copy-message-btn, .pin-message-btn { width: 24px; height: 24px; font-size: 0.7em; }
+            .user-message .message-actions { right: 5px; } /* Adjust if needed */
+            .bot-message .message-actions { left: 5px; } /* Adjust if needed */
+            .input-area { padding: 8px; gap: 8px;}
+            #messageInput { min-height: 40px; }
+            #sendBtn { height: 40px; font-size: 0.9rem; }
+            #sendBtn i { margin-left: 6px; }
+            #scrollToBottomBtn { bottom: 10px; right: 10px; width: 36px; height: 36px; font-size: 1em;}
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+
+        <div class="modal-container" id="settingsModalContainer">
+            <div class="modal-content">
+                <button class="modal-close-btn" id="closeSettingsModalBtn" aria-label="Close settings">&times;</button>
+                <h2><i class="fas fa-cog"></i> الإعدادات</h2>
+                <div class="setting-item">
+                    <label for="themeToggleBtn">الوضع الداكن:</label>
+                    <button id="themeToggleBtn" aria-label="Toggle theme"><i class="fas fa-moon"></i></button>
+                </div>
+                <div class="setting-item">
+                    <label>حجم خط الرسائل:</label>
+                    <div>
+                        <button id="decreaseFontBtn" aria-label="Decrease font size">-</button>
+                        <span id="currentFontSizePreview">عادي</span>
+                        <button id="increaseFontBtn" aria-label="Increase font size">+</button>
+                    </div>
+                </div>
+                 <div class="setting-item">
+                    <button id="requestNotificationPermissionBtn" class="full-width-btn">تفعيل إشعارات المتصفح</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-comments"></i> محادثاتي</h2>
+                <p>كل دردشاتك هنا</p>
+                <div class="islamic-reminder" id="islamicReminder">
+                    <!-- Reminder will be injected by JS -->
+                </div>
+            </div>
+            <button id="newChatBtn"><i class="fas fa-plus-circle"></i> محادثة جديدة</button>
+            <div class="chat-list" id="chatList"></div>
+            <button id="openSettingsBtn" class="sidebar-footer-btn"><i class="fas fa-cog"></i> الإعدادات</button>
+        </div>
+
+        <div class="chat-area">
+            <div class="header">
+                <button id="menuToggleBtn"><i class="fas fa-bars"></i></button>
+                <div class="header-content">
+                    <h1 id="mainAppTitle"><i class="fas fa-mosque"></i> IslamGPT</h1>
+                    <p id="chatSpecificTitle">مساعدك الإسلامي الذكي</p>
+                </div>
+                <div class="header-actions">
+                    <button id="searchChatToggleBtn" aria-label="Search chat" title="بحث في المحادثة"><i class="fas fa-search"></i></button>
+                    <div class="chat-options-dropdown">
+                        <button id="chatOptionsBtn" aria-label="Chat options" title="خيارات المحادثة"><i class="fas fa-ellipsis-v"></i></button>
+                        <div class="dropdown-content" id="chatOptionsDropdownContent">
+                            <button id="clearChatBtn"><i class="fas fa-eraser"></i> مسح المحادثة الحالية</button>
+                            <button id="exportChatBtn"><i class="fas fa-file-export"></i> تصدير المحادثة</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="botStatus">جاري الكتابة...</div>
+            </div>
+            <div class="search-bar-container" id="searchBarContainer">
+                <input type="text" id="chatSearchInput" placeholder="ابحث في هذه المحادثة...">
+                <button id="clearSearchBtn" aria-label="Clear search" title="مسح البحث">&times;</button>
+            </div>
+            <div class="messages" id="messages">
+                <!-- Messages and Quick Prompts will be dynamically inserted here -->
+            </div>
+            <button id="scrollToBottomBtn" title="النزول للأسفل"><i class="fas fa-arrow-down"></i></button>
+            <div class="input-area">
+                <button id="sendBtn" onclick="sendMessage()">إرسال <i class="fas fa-paper-plane"></i></button>
+                <textarea id="messageInput" placeholder="اكتب سؤالك هنا..." onkeypress="handleEnter(event)" oninput="adjustTextareaHeight()"></textarea>
+            </div>
+        </div>
+        <div class="visually-hidden" id="ariaLiveRegion" aria-live="polite" aria-atomic="true"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.3.10/purify.min.js"></script>
+    <script>
+        // --- START OF JAVASCRIPT ---
+        let isLoading = false;
+        const webhookUrl = 'https://n8n-wf0f.onrender.com/webhook/97f43b05-efdc-4ee8-929e-34752486d9d0';
+
+        let state = {
+            chats: [],
+            activeChatId: null,
+            currentSearchTerm: '',
+            // Pinned messages would ideally be stored per chat:
+            // pinnedMessages: { chatId1: [messageId1, messageId2], chatId2: [...] }
+            // For simplicity in single state, we'll just add `isPinned` to message object.
+        };
+
+        const DOM = {
+            sidebar: document.getElementById('sidebar'),
+            menuToggleBtn: document.getElementById('menuToggleBtn'),
+            mobileOverlay: document.getElementById('mobileOverlay'),
+            messagesDiv: document.getElementById('messages'),
+            messageInput: document.getElementById('messageInput'),
+            sendBtn: document.getElementById('sendBtn'),
+            chatList: document.getElementById('chatList'),
+            newChatBtn: document.getElementById('newChatBtn'),
+            mainAppTitle: document.getElementById('mainAppTitle'),
+            chatSpecificTitle: document.getElementById('chatSpecificTitle'),
+            scrollToBottomBtn: document.getElementById('scrollToBottomBtn'),
+            botStatus: document.getElementById('botStatus'),
+            settingsModalContainer: document.getElementById('settingsModalContainer'),
+            closeSettingsModalBtn: document.getElementById('closeSettingsModalBtn'),
+            openSettingsBtn: document.getElementById('openSettingsBtn'),
+            themeToggleBtn: document.getElementById('themeToggleBtn'),
+            decreaseFontBtn: document.getElementById('decreaseFontBtn'),
+            increaseFontBtn: document.getElementById('increaseFontBtn'),
+            currentFontSizePreview: document.getElementById('currentFontSizePreview'),
+            islamicReminder: document.getElementById('islamicReminder'),
+            searchChatToggleBtn: document.getElementById('searchChatToggleBtn'),
+            searchBarContainer: document.getElementById('searchBarContainer'),
+            chatSearchInput: document.getElementById('chatSearchInput'),
+            clearSearchBtn: document.getElementById('clearSearchBtn'),
+            chatOptionsBtn: document.getElementById('chatOptionsBtn'),
+            chatOptionsDropdownContent: document.getElementById('chatOptionsDropdownContent'),
+            clearChatBtn: document.getElementById('clearChatBtn'),
+            exportChatBtn: document.getElementById('exportChatBtn'),
+            ariaLiveRegion: document.getElementById('ariaLiveRegion'),
+            requestNotificationPermissionBtn: document.getElementById('requestNotificationPermissionBtn'),
+        };
+
+        // --- THEME & FONT SETTINGS ---
+        let currentTheme = localStorage.getItem('islamGptTheme') || 'dark';
+        const fontSizeSteps = [-0.2, -0.1, 0, 0.1, 0.2, 0.3]; // rem adjustments, added one more step
+        let currentFontSizeStep = parseInt(localStorage.getItem('islamGptFontSizeStep') || '2');
+
+        function applyTheme(theme) {
+            if (theme === 'light') {
+                document.documentElement.classList.add('light-theme');
+                if (DOM.themeToggleBtn) DOM.themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                document.documentElement.classList.remove('light-theme');
+                if (DOM.themeToggleBtn) DOM.themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+            }
+            currentTheme = theme;
+            localStorage.setItem('islamGptTheme', theme);
+        }
+        function toggleTheme() { applyTheme(currentTheme === 'dark' ? 'light' : 'dark'); }
+
+        function applyFontSize() {
+            const baseMobileSize = window.matchMedia("(max-width: 480px)").matches ? 0.85 :
+                                   window.matchMedia("(max-width: 768px)").matches ? 0.9 : 0.95;
+            const newSize = baseMobileSize + fontSizeSteps[currentFontSizeStep];
+            document.documentElement.style.setProperty('--message-font-base-size', `${newSize}rem`);
+            
+            const previewTexts = ["صغير جداً", "صغير", "عادي", "كبير", "كبير جداً", "الأكبر"];
+            if (DOM.currentFontSizePreview) DOM.currentFontSizePreview.textContent = previewTexts[currentFontSizeStep];
+            localStorage.setItem('islamGptFontSizeStep', currentFontSizeStep);
+        }
+        function changeFontSize(direction) {
+            if (direction === 'increase' && currentFontSizeStep < fontSizeSteps.length - 1) currentFontSizeStep++;
+            else if (direction === 'decrease' && currentFontSizeStep > 0) currentFontSizeStep--;
+            applyFontSize();
+        }
+        
+        // --- MODALS & MENUS ---
+        function openSettingsModal() { if(DOM.settingsModalContainer) DOM.settingsModalContainer.classList.add('visible'); }
+        function closeSettingsModal() { if(DOM.settingsModalContainer) DOM.settingsModalContainer.classList.remove('visible'); }
+        function toggleMobileMenu() {
+            if(DOM.sidebar) DOM.sidebar.classList.toggle('open');
+            if(DOM.mobileOverlay) DOM.mobileOverlay.classList.toggle('active');
+        }
+        function toggleChatOptionsDropdown(event) {
+            event.stopPropagation();
+            if (DOM.chatOptionsDropdownContent) DOM.chatOptionsDropdownContent.parentElement.classList.toggle('open');
+        }
+        document.addEventListener('click', function(event) {
+            if (DOM.chatOptionsDropdownContent && DOM.chatOptionsDropdownContent.parentElement.classList.contains('open') &&
+                !DOM.chatOptionsDropdownContent.parentElement.contains(event.target) &&
+                !event.target.matches('#chatOptionsBtn') && !event.target.closest('#chatOptionsBtn') ) {
+                DOM.chatOptionsDropdownContent.parentElement.classList.remove('open');
+            }
+        });
+
+        // --- ISLAMIC REMINDER ---
+        const islamicReminders = [
+            "سبحان الله وبحمده، سبحان الله العظيم.", "استغفر الله العظيم وأتوب إليه.",
+            "لا إله إلا أنت سبحانك إني كنت من الظالمين.", "اللهم صل وسلم على نبينا محمد.",
+            "من صلى عليّ صلاة صلى الله عليه بها عشراً. (حديث)", "قل هو الله أحد...",
+            "خيركم من تعلم القرآن وعلمه. (حديث)", "تبسمك في وجه أخيك صدقة. (حديث)"
+        ];
+        function displayIslamicReminder() {
+            if (!DOM.islamicReminder) return;
+            const today = new Date();
+            const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+            DOM.islamicReminder.textContent = islamicReminders[dayOfYear % islamicReminders.length];
+        }
+
+        // --- SCROLL & UI UTILITIES ---
+        let userScrolledUp = false;
+        function handleScroll() {
+            if (!DOM.messagesDiv) return;
+            const { scrollTop, scrollHeight, clientHeight } = DOM.messagesDiv;
+            if (scrollHeight - scrollTop - clientHeight > clientHeight * 0.5) {
+                if(DOM.scrollToBottomBtn) DOM.scrollToBottomBtn.classList.add('visible');
+                userScrolledUp = true;
+            } else {
+                if(DOM.scrollToBottomBtn) DOM.scrollToBottomBtn.classList.remove('visible');
+                userScrolledUp = false;
+            }
+        }
+        function autoScrollToBottom(force = false) {
+            if (!DOM.messagesDiv) return;
+            if (!userScrolledUp || force) {
+                DOM.messagesDiv.scrollTop = DOM.messagesDiv.scrollHeight;
+                if(DOM.scrollToBottomBtn) DOM.scrollToBottomBtn.classList.remove('visible');
+                userScrolledUp = false;
+            }
+        }
+        function adjustTextareaHeight() {
+            if (!DOM.messageInput) return;
+            DOM.messageInput.style.height = 'auto';
+            const scrollHeight = DOM.messageInput.scrollHeight;
+            const maxHeight = parseInt(window.getComputedStyle(DOM.messageInput).maxHeight, 10) || 120;
+            DOM.messageInput.style.height = Math.min(scrollHeight, maxHeight) + 'px';
+        }
+        function announceToScreenReader(text) {
+            if(DOM.ariaLiveRegion) DOM.ariaLiveRegion.textContent = text;
+             // Clear after a moment so it can be re-announced
+            setTimeout(() => { if(DOM.ariaLiveRegion) DOM.ariaLiveRegion.textContent = ''; }, 500);
+        }
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => { 
+                    announceToScreenReader("تم نسخ النص");
+                    // Optional: show a toast/temp message
+                })
+                .catch(err => { console.error('Failed to copy: ', err); alert("فشل النسخ."); });
+        }
+
+        // --- LOCAL STORAGE & STATE ---
+        function saveState() { try { localStorage.setItem('islamGptState', JSON.stringify(state)); } catch (e) { console.error("Save state failed:", e); }}
+        function loadState() {
+            try {
+                const storedState = localStorage.getItem('islamGptState');
+                if (storedState) {
+                    const parsedState = JSON.parse(storedState);
+                    // Merge carefully to preserve structure if new state keys are added in code
+                    state = { ...state, ...parsedState }; 
+                    if (!Array.isArray(state.chats)) state.chats = [];
+                     // Ensure messages have IDs and potentially other new properties
+                    state.chats.forEach(chat => {
+                        if (!Array.isArray(chat.messages)) chat.messages = [];
+                        chat.messages.forEach(msg => {
+                            if (!msg.id) msg.id = generateId(); // Retroactively add IDs
+                            if (msg.isPinned === undefined) msg.isPinned = false; // Add default
+                        });
+                    });
+                    if (state.activeChatId && !state.chats.find(c => c.id === state.activeChatId)) state.activeChatId = null;
+                }
+            } catch (e) { console.error("Load state failed:", e); }
+            if (!state.chats) state.chats = [];
+        }
+        function generateId() { return '_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36); }
+        
+        // --- CHAT OPERATIONS ---
+        function createNewChat(switchToNew = true) { /* ... as before ... */ 
+            const newChatId = generateId();
+            const newChat = { id: newChatId, name: `محادثة ${state.chats.length + 1}`, messages: [], createdAt: new Date().toISOString() };
+            state.chats.unshift(newChat);
+            if (switchToNew || !state.activeChatId) state.activeChatId = newChatId;
+            saveState(); renderApp();
+            if (switchToNew && DOM.messageInput) DOM.messageInput.focus();
+            if (DOM.sidebar && DOM.sidebar.classList.contains('open')) toggleMobileMenu();
+        }
+        function switchChat(chatId) { /* ... as before ... */
+            if (state.activeChatId === chatId) {
+                if (DOM.sidebar && DOM.sidebar.classList.contains('open')) toggleMobileMenu();
+                return;
+            }
+            state.activeChatId = chatId; 
+            state.currentSearchTerm = ''; // Reset search on chat switch
+            if (DOM.chatSearchInput) DOM.chatSearchInput.value = '';
+            if (DOM.searchBarContainer) DOM.searchBarContainer.classList.remove('visible');
+            saveState(); renderApp();
+            if (DOM.messageInput) DOM.messageInput.focus();
+            if (DOM.sidebar && DOM.sidebar.classList.contains('open')) toggleMobileMenu();
+        }
+        function deleteChat(chatId, event) { /* ... as before ... */
+            event.stopPropagation();
+            if (!confirm("هل أنت متأكد أنك تريد حذف هذه المحادثة؟")) return;
+            state.chats = state.chats.filter(chat => chat.id !== chatId);
+            if (state.activeChatId === chatId) state.activeChatId = state.chats.length > 0 ? state.chats[0].id : null;
+            saveState(); renderApp();
+        }
+        function renameChat(chatId, listItemElement) { /* ... as before, with visual cue */
+            const chat = state.chats.find(c => c.id === chatId);
+            if (!chat || !listItemElement) return;
+            listItemElement.classList.add('renaming');
+            const newName = prompt("أدخل الاسم الجديد للمحادثة:", chat.name);
+            listItemElement.classList.remove('renaming');
+            if (newName && newName.trim() !== "" && newName.trim() !== chat.name) {
+                chat.name = newName.trim().substring(0, 50);
+                saveState(); renderApp();
+            }
+        }
+        function clearCurrentChat() { /* ... as implemented above ... */
+            if (!state.activeChatId) return;
+            if (confirm("هل أنت متأكد أنك تريد مسح جميع الرسائل في هذه المحادثة؟ لا يمكن التراجع عن هذا الإجراء.")) {
+                const activeChat = state.chats.find(chat => chat.id === state.activeChatId);
+                if (activeChat) { activeChat.messages = []; saveState(); renderMessages(); }
+            }
+            if (DOM.chatOptionsDropdownContent) DOM.chatOptionsDropdownContent.parentElement.classList.remove('open');
+        }
+        function exportChat() { /* ... as implemented above ... */
+            if (!state.activeChatId) return;
+            const activeChat = state.chats.find(chat => chat.id === state.activeChatId);
+            if (activeChat && activeChat.messages.length > 0) {
+                let chatText = `محادثة: ${activeChat.name}\nتاريخ التصدير: ${new Date().toLocaleString('ar-EG')}\n\n`;
+                activeChat.messages.forEach(msg => {
+                    const prefix = msg.isUser ? "أنت:" : "IslamGPT:";
+                    const time = formatMessageTimestamp(msg.timestamp); // Use granular timestamp
+                    chatText += `[${time}] ${prefix}\n${msg.text}\n\n`;
+                });
+                const blob = new Blob([chatText], { type: 'text/plain;charset=utf-8' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${activeChat.name.replace(/[^a-z0-9إلىيء-ي]/gi, '_')}_${new Date().toISOString().slice(0,10)}.txt`;
+                document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(link.href);
+            } else { alert("لا توجد رسائل لتصديرها في هذه المحادثة."); }
+            if (DOM.chatOptionsDropdownContent) DOM.chatOptionsDropdownContent.parentElement.classList.remove('open');
+        }
+
+        // --- SEARCH CHAT ---
+        function toggleSearchChat() { /* ... as implemented above ... */
+            if (DOM.searchBarContainer) {
+                DOM.searchBarContainer.classList.toggle('visible');
+                if (DOM.searchBarContainer.classList.contains('visible')) { if(DOM.chatSearchInput) DOM.chatSearchInput.focus(); }
+                else { if(DOM.chatSearchInput) DOM.chatSearchInput.value = ''; state.currentSearchTerm = ''; renderMessages(); }
+            }
+        }
+        function handleChatSearch() { /* ... as implemented above ... */
+            if(DOM.chatSearchInput) state.currentSearchTerm = DOM.chatSearchInput.value.trim().toLowerCase();
+            renderMessages();
+        }
+        function clearChatSearch() { /* ... as implemented above ... */
+            if(DOM.chatSearchInput) DOM.chatSearchInput.value = ''; state.currentSearchTerm = ''; renderMessages();
+            if(DOM.chatSearchInput) DOM.chatSearchInput.focus();
+        }
+        
+        // --- PIN MESSAGE ---
+        function togglePinMessage(messageId) { /* ... as implemented above ... */
+            if (!state.activeChatId) return;
+            const activeChat = state.chats.find(chat => chat.id === state.activeChatId);
+            if (activeChat) {
+                const message = activeChat.messages.find(msg => msg.id === messageId);
+                if (message) { message.isPinned = !message.isPinned; saveState(); renderMessages(); }
+            }
+        }
+        
+        // --- QUICK PROMPTS ---
+        const quickPrompts = [ /* ... as defined above ... */
+            { display: "ما هي أركان الإسلام؟", prompt: "ما هي أركان الإسلام الخمسة؟" },
+            { display: "شرح سورة الفاتحة", prompt: "اشرح لي معاني سورة الفاتحة." },
+            { display: "قصة النبي آدم", prompt: "حدثني عن قصة النبي آدم عليه السلام." },
+            { display: "فضل الصدقة", prompt: "ما هو فضل الصدقة في الإسلام؟" }
+        ];
+        function populateQuickPrompts() { /* ... as implemented above ... */
+            const container = document.getElementById('quickPromptsContainer'); // Will be inside messagesDiv
+            if (!container) return;
+            container.innerHTML = '<h4><i class="fas fa-lightbulb"></i> اقتراحات سريعة:</h4>';
+            quickPrompts.forEach(qp => {
+                const btn = document.createElement('button');
+                btn.className = 'quick-prompt-btn'; btn.textContent = qp.display;
+                btn.onclick = () => { if(DOM.messageInput) DOM.messageInput.value = qp.prompt; sendMessage(); };
+                container.appendChild(btn);
+            });
+        }
+        
+        // --- TIMESTAMP FORMATTING ---
+        function formatMessageTimestamp(isoTimestamp) { /* ... as implemented above ... */
+            const date = new Date(isoTimestamp); const now = new Date();
+            const diffSeconds = Math.round((now - date) / 1000); const diffMinutes = Math.round(diffSeconds / 60);
+            const diffHours = Math.round(diffMinutes / 60);
+            if (diffSeconds < 5) return "الآن"; if (diffSeconds < 60) return `منذ ${diffSeconds} ثانية`;
+            if (diffMinutes < 60) return `منذ ${diffMinutes} دقيقة`;
+            if (diffHours < 24 && date.getDate() === now.getDate()) return `اليوم ${date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}`;
+            if (diffHours < 48 && date.getDate() === now.getDate() - 1) return `أمس ${date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}`;
+            return date.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }) + ' ' + date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // --- MESSAGE RENDERING & STATE ---
+        function displayMessage(text, isUser, isError = false, timestamp, animateAsNew = false, messageId, isPinned = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            if(animateAsNew) messageDiv.classList.add('animate-new');
+            if (isError) messageDiv.classList.add('error');
+
+            const actionsContainer = document.createElement('div');
+            actionsContainer.className = 'message-actions';
+
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-message-btn'; copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+            copyBtn.title = "نسخ النص"; copyBtn.onclick = () => copyToClipboard(String(text));
+            actionsContainer.appendChild(copyBtn);
+
+            const pinBtn = document.createElement('button');
+            pinBtn.className = `pin-message-btn ${isPinned ? 'pinned' : ''}`;
+            pinBtn.innerHTML = `<i class="fas fa-thumbtack"></i>`;
+            pinBtn.title = isPinned ? "إلغاء تثبيت الرسالة" : "تثبيت الرسالة";
+            pinBtn.setAttribute('aria-pressed', isPinned);
+            pinBtn.onclick = () => togglePinMessage(messageId);
+            actionsContainer.appendChild(pinBtn);
+            
+            messageDiv.appendChild(actionsContainer);
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            let sanitizedText = DOMPurify.sanitize(String(text).replace(/\n/g, '<br>'));
+            if (state.currentSearchTerm && sanitizedText.toLowerCase().includes(state.currentSearchTerm)) {
+                const regex = new RegExp(state.currentSearchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').split(/\s+/).filter(Boolean).join('|'), 'gi');
+                sanitizedText = sanitizedText.replace(regex, match => `<mark>${match}</mark>`);
+            }
+            contentDiv.innerHTML = sanitizedText;
+            messageDiv.appendChild(contentDiv);
+
+            const timestampDiv = document.createElement('div');
+            timestampDiv.className = 'message-timestamp';
+            try { timestampDiv.textContent = formatMessageTimestamp(timestamp); }
+            catch (e) { timestampDiv.textContent = "---"; }
+            messageDiv.appendChild(timestampDiv);
+            
+            if(DOM.messagesDiv) DOM.messagesDiv.appendChild(messageDiv);
+        }
+        function addMessageToState(text, isUser, isError = false) { /* ... as before, ensuring ID and isPinned default ... */
+            const activeChat = state.chats.find(chat => chat.id === state.activeChatId);
+            if (!activeChat) return null;
+            const message = { id: generateId(), text: text, isUser: isUser, isError: isError, timestamp: new Date().toISOString(), isPinned: false };
+            activeChat.messages.push(message);
+            if (isUser && activeChat.messages.filter(m => m.isUser).length === 1 && activeChat.name.startsWith("محادثة ")) {
+                const firstWords = String(text).split(' ').slice(0, 4).join(' ');
+                activeChat.name = firstWords.substring(0,30) + (String(text).length > firstWords.length ? "..." : "");
+                updateChatTitle(); renderChatList(); 
+            }
+            saveState(); return message; 
+        }
+        function renderMessages() { /* ... as implemented above, passing messageId and isPinned status and calling populateQuickPrompts ... */
+            if (!DOM.messagesDiv) return;
+            DOM.messagesDiv.innerHTML = ''; // Clear previous messages
+            const activeChat = state.chats.find(chat => chat.id === state.activeChatId);
+            if (!activeChat) {
+                DOM.messagesDiv.innerHTML = `<div class="no-chat-selected"><i class="fas fa-comments"></i><h3>لم يتم تحديد محادثة</h3><p>اختر محادثة أو أنشئ واحدة جديدة.</p></div>`;
+                if (DOM.messageInput) DOM.messageInput.disabled = true; if (DOM.sendBtn) DOM.sendBtn.disabled = true;
+                return;
+            }
+            if (DOM.messageInput) DOM.messageInput.disabled = isLoading; if (DOM.sendBtn) DOM.sendBtn.disabled = isLoading;
+
+            if (activeChat.messages.length === 0) {
+                DOM.messagesDiv.innerHTML = `
+                    <div class="welcome-area">
+                        <i class="fas fa-hand-sparkles"></i>
+                        <h3>أهلاً بك في ${DOMPurify.sanitize(activeChat.name)}</h3>
+                        <p>اطرح سؤالك في الأسفل أو اختر من الاقتراحات السريعة:</p>
+                        <div class="quick-prompts-container" id="quickPromptsContainer"></div>
+                    </div>`;
+                populateQuickPrompts();
+            } else {
+                // Display pinned messages first, then regular messages
+                const pinnedMessages = activeChat.messages.filter(msg => msg.isPinned);
+                const regularMessages = activeChat.messages.filter(msg => !msg.isPinned);
+                
+                pinnedMessages.forEach((msg, index) => {
+                     displayMessage(msg.text, msg.isUser, msg.isError, msg.timestamp, false, msg.id, msg.isPinned);
+                });
+                if(pinnedMessages.length > 0 && regularMessages.length > 0) {
+                    const separator = document.createElement('hr'); 
+                    separator.style.borderColor = 'var(--border-color)';
+                    separator.style.margin = '10px 0';
+                    DOM.messagesDiv.appendChild(separator);
+                }
+                regularMessages.forEach((msg, index) => {
+                    const animateAsNew = index === regularMessages.length - 1 && (Date.now() - new Date(msg.timestamp).getTime() < 3000);
+                    displayMessage(msg.text, msg.isUser, msg.isError, msg.timestamp, animateAsNew, msg.id, msg.isPinned);
+                });
+            }
+            autoScrollToBottom(true);
+        }
+        
+        // --- UI RENDERING & UPDATES ---
+        function updateChatTitle() { /* ... as before ... */
+            const activeChat = state.chats.find(chat => chat.id === state.activeChatId);
+            if (DOM.mainAppTitle) DOM.mainAppTitle.innerHTML = `<i class="fas fa-mosque"></i> IslamGPT`;
+            if (DOM.chatSpecificTitle) DOM.chatSpecificTitle.textContent = activeChat ? activeChat.name : "مساعدك الإسلامي الذكي";
+        }
+        function renderChatList() { /* ... as before ... */
+            if (!DOM.chatList) return;
+            DOM.chatList.innerHTML = '';
+            if (state.chats.length === 0) {
+                DOM.chatList.innerHTML = '<p class="info-message" style="padding: 20px 10px;">لا توجد محادثات بعد.<br>ابدأ واحدة جديدة!</p>';
+                return;
+            }
+            state.chats.forEach(chat => { /* ... create item as before, use renameChat(chat.id, item) ... */
+                const item = document.createElement('div');
+                item.className = `chat-list-item ${chat.id === state.activeChatId ? 'active' : ''}`;
+                item.setAttribute('data-id', chat.id); item.onclick = () => switchChat(chat.id);
+                item.setAttribute('role', 'button'); item.tabIndex = 0;
+                item.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') switchChat(chat.id); };
+                const chatNameSpan = document.createElement('span');
+                chatNameSpan.textContent = chat.name; chatNameSpan.title = chat.name;
+                chatNameSpan.ondblclick = (e) => { e.stopPropagation(); renameChat(chat.id, item); };
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-chat-btn'; deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                deleteBtn.title = "حذف المحادثة"; deleteBtn.setAttribute('aria-label', 'حذف ' + chat.name);
+                deleteBtn.onclick = (e) => deleteChat(chat.id, e);
+                item.appendChild(deleteBtn); item.appendChild(chatNameSpan); DOM.chatList.appendChild(item);
+            });
+        }
+        function renderApp() { /* ... as before ... */
+            renderChatList(); renderMessages(); updateChatTitle(); adjustTextareaHeight();
+            const canInteract = !!state.activeChatId && !isLoading;
+            if (DOM.sendBtn) DOM.sendBtn.disabled = !canInteract;
+            if (DOM.messageInput) DOM.messageInput.disabled = !canInteract;
+            if (!isLoading && DOM.sendBtn) DOM.sendBtn.innerHTML = 'إرسال <i class="fas fa-paper-plane"></i>';
+        }
+        function showLoadingIndicator() { /* ... as before, with botStatus update ... */
+            if (document.getElementById('loadingIndicator')) return;
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message bot-message loading animate-new'; loadingDiv.id = 'loadingIndicator';
+            loadingDiv.style.opacity = '1';
+            loadingDiv.innerHTML = `<div class="message-content">جاري الكتابة... <i class="fas fa-spinner fa-spin"></i></div><div class="message-timestamp">&nbsp;</div>`;
+            if(DOM.messagesDiv) DOM.messagesDiv.appendChild(loadingDiv);
+            if (DOM.botStatus) DOM.botStatus.classList.add('visible');
+            autoScrollToBottom();
+        }
+        function hideLoadingIndicator() { /* ... as before, with botStatus update ... */
+            const loading = document.getElementById('loadingIndicator'); if (loading) loading.remove();
+            if (DOM.botStatus) DOM.botStatus.classList.remove('visible');
+        }
+        
+        // --- SEND MESSAGE & API ---
+        async function sendMessage() { /* ... as before, with announceToScreenReader ... */
+            if (!DOM.messageInput || !DOM.sendBtn) return;
+            const messageText = DOM.messageInput.value.trim();
+            if (!messageText || isLoading || !state.activeChatId) return;
+            const activeChat = state.chats.find(chat => chat.id === state.activeChatId);
+            if (!activeChat) return;
+            if (activeChat.messages.length === 0 && DOM.messagesDiv) DOM.messagesDiv.innerHTML = '';
+            const userMsg = addMessageToState(messageText, true);
+            if(userMsg) displayMessage(userMsg.text, userMsg.isUser, userMsg.isError, userMsg.timestamp, true, userMsg.id, userMsg.isPinned);
+            autoScrollToBottom(true);
+            DOM.messageInput.value = ''; adjustTextareaHeight();
+            isLoading = true; DOM.sendBtn.disabled = true;
+            DOM.sendBtn.innerHTML = 'جاري الإرسال... <i class="fas fa-circle-notch fa-spin"></i>';
+            DOM.messageInput.disabled = true; showLoadingIndicator();
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST', headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+                    body: JSON.stringify({ message: messageText, timestamp: new Date().toISOString(),
+                        source: 'IslamGPT_SingleFile_v1', user_id: 'user_' + Date.now(), chat_id: state.activeChatId })
+                });
+                hideLoadingIndicator(); let botResponseText;
+                if (!response.ok) { let errBody="فشل"; try{errBody=await response.text();}catch(_){} throw new Error(`خطأ ${response.status}: ${errBody||response.statusText}`); }
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    botResponseText = data.response || data.message || data.reply || data.text || data.content || data.output;
+                    if (botResponseText === undefined || botResponseText === null) botResponseText = (typeof data === 'string')?data:"رد غير متوقع: "+JSON.stringify(data,null,2);
+                } else { botResponseText = await response.text(); }
+                const responseText = String(botResponseText).trim();
+                if (!responseText) {
+                    const botMsg = addMessageToState("لم يتمكن البوت من تقديم رد.", false, true);
+                    if(botMsg) displayMessage(botMsg.text, botMsg.isUser, botMsg.isError, botMsg.timestamp, true, botMsg.id, botMsg.isPinned);
+                    announceToScreenReader("لم يتمكن البوت من تقديم رد.");
+                } else {
+                    const botMsg = addMessageToState(responseText, false);
+                    if(botMsg) displayMessage(botMsg.text, botMsg.isUser, botMsg.isError, botMsg.timestamp, true, botMsg.id, botMsg.isPinned);
+                    announceToScreenReader("رسالة جديدة من IslamGPT: " + responseText.substring(0, 100)); // Announce part of message
+                }
+                autoScrollToBottom();
+            } catch (error) { /* ... error handling as before ... */
+                hideLoadingIndicator(); console.error('SendMessage Error:', error);
+                let errMsg = 'عذراً، حدث خطأ: ';
+                errMsg += (error.name === 'TypeError' && error.message.includes('Failed to fetch')) ? 'تعذر الاتصال بالخادم.' : error.message;
+                const errBotMsg = addMessageToState(errMsg, false, true);
+                if(errBotMsg) displayMessage(errBotMsg.text, errBotMsg.isUser, errBotMsg.isError, errBotMsg.timestamp, true, errBotMsg.id, errBotMsg.isPinned);
+                announceToScreenReader(errMsg); autoScrollToBottom();
+            } finally { /* ... as before ... */
+                isLoading = false; const canInteract = !!state.activeChatId;
+                DOM.sendBtn.disabled = !canInteract; DOM.messageInput.disabled = !canInteract;
+                DOM.sendBtn.innerHTML = 'إرسال <i class="fas fa-paper-plane"></i>';
+                if (canInteract && DOM.messageInput) DOM.messageInput.focus();
+            }
+        }
+        function handleEnter(event) { /* ... as before ... */
+            if (event.key === 'Enter' && !event.shiftKey && !isLoading && state.activeChatId) { event.preventDefault(); sendMessage(); }
+        }
+        
+        // --- PUSH NOTIFICATIONS (CONCEPTUAL - Requires sw.js & Backend) ---
+        async function registerServiceWorkerAndSubscribe() { /* ... as before, with VAPID key placeholder ... */
+            // Full implementation from previous response, ensure sw.js is separate and backend is set up.
+            // For this single file, actual push sending won't work without those.
+            alert("لعمل الإشعارات، يلزم إعدادات متقدمة وملف إضافي (sw.js) وخادم.");
+            console.log("Push Notification subscription logic called. Requires sw.js and backend setup.");
+        }
+        function urlBase64ToUint8Array(base64String) { /* ... as before ... */
+            const padding='='.repeat((4-base64String.length%4)%4); const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+            const rawData=window.atob(base64); const outputArray=new Uint8Array(rawData.length);
+            for(let i=0;i<rawData.length;++i)outputArray[i]=rawData.charCodeAt(i); return outputArray;
+        }
+
+        // --- INITIALIZATION ---
+        function init() {
+            loadState(); applyTheme(currentTheme); applyFontSize(); displayIslamicReminder();
+            if (state.chats.length === 0) createNewChat(false); // createNewChat calls renderApp if needed
+            else if (!state.activeChatId || !state.chats.find(c => c.id === state.activeChatId)) {
+                state.activeChatId = state.chats.length > 0 ? state.chats[0].id : null;
+                saveState(); renderApp();
+            } else { renderApp(); } // Ensure initial render if no new chat was created
+            
+            // Event Listeners (ensure DOM elements exist before adding listeners)
+            if(DOM.newChatBtn) DOM.newChatBtn.onclick = () => createNewChat(true);
+            if(DOM.menuToggleBtn) DOM.menuToggleBtn.onclick = toggleMobileMenu;
+            if(DOM.mobileOverlay) DOM.mobileOverlay.onclick = toggleMobileMenu;
+            if(DOM.messagesDiv) DOM.messagesDiv.addEventListener('scroll', handleScroll);
+            if(DOM.scrollToBottomBtn) DOM.scrollToBottomBtn.onclick = () => autoScrollToBottom(true);
+            if(DOM.openSettingsBtn) DOM.openSettingsBtn.onclick = openSettingsModal;
+            if(DOM.closeSettingsModalBtn) DOM.closeSettingsModalBtn.onclick = closeSettingsModal;
+            if(DOM.themeToggleBtn) DOM.themeToggleBtn.onclick = toggleTheme;
+            if(DOM.increaseFontBtn) DOM.increaseFontBtn.onclick = () => changeFontSize('increase');
+            if(DOM.decreaseFontBtn) DOM.decreaseFontBtn.onclick = () => changeFontSize('decrease');
+            if(DOM.searchChatToggleBtn) DOM.searchChatToggleBtn.onclick = toggleSearchChat;
+            if(DOM.chatSearchInput) DOM.chatSearchInput.addEventListener('input', handleChatSearch);
+            if(DOM.clearSearchBtn) DOM.clearSearchBtn.onclick = clearChatSearch;
+            if(DOM.chatOptionsBtn) DOM.chatOptionsBtn.onclick = toggleChatOptionsDropdown;
+            if(DOM.clearChatBtn) DOM.clearChatBtn.onclick = clearCurrentChat;
+            if(DOM.exportChatBtn) DOM.exportChatBtn.onclick = exportChat;
+            if(DOM.requestNotificationPermissionBtn) DOM.requestNotificationPermissionBtn.onclick = registerServiceWorkerAndSubscribe;
+
+            if (state.activeChatId && DOM.messageInput) DOM.messageInput.focus();
+            else if (!state.activeChatId && DOM.newChatBtn) { /* DOM.newChatBtn.focus(); */ }
+        }
+        
+        if (typeof DOMPurify === 'undefined') { // Basic DOMPurify fallback
+            console.warn("DOMPurify not loaded. HTML will not be sanitized (basic fallback used).");
+            window.DOMPurify = { sanitize: (text) => String(text).replace(/</g, "&lt;").replace(/>/g, "&gt;") };
+        }
+        window.onload = init;
+        // --- END OF JAVASCRIPT ---
+    </script>
+</body>
+</html>
